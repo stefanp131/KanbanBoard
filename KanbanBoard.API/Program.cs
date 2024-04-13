@@ -49,20 +49,17 @@ app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllers();
-    });
+    app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 }
 else
 {
+    app.UseStaticFiles();
+
     app.UseEndpoints(endpoints =>
     {
         endpoints.MapControllers();
         endpoints.MapFallbackToController("Index", "Fallback");
     });
-    
-    app.UseStaticFiles();
 }
 
 using var scope = app.Services.CreateScope();

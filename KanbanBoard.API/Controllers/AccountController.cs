@@ -1,8 +1,10 @@
+using System;
 using System.Threading.Tasks;
 using KanbanBoard.API.Controllers;
 using KanbanBoard.Services.Dtos;
 using KanbanBoard.Services.Exceptions;
 using KanbanBoard.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Spaces.API.Controllers;
@@ -21,7 +23,14 @@ public class AccountController : BaseApiController
     {
         try
         {
-            await _accountService.LoginAsync(loginDto);
+            var token = await _accountService.LoginAsync(loginDto);
+
+            Response.Cookies.Append("jwtToken", token, new CookieOptions
+            {
+                HttpOnly = true,
+                MaxAge = TimeSpan.FromDays(1),
+                Secure = true
+            });
             return Ok();
         }
         catch (BadCredentialsException)
@@ -35,7 +44,14 @@ public class AccountController : BaseApiController
     {
         try
         {
-            await _accountService.RegisterAsync(registerDto);
+            var token = await _accountService.RegisterAsync(registerDto);
+
+            Response.Cookies.Append("jwtToken", token, new CookieOptions
+            {
+                HttpOnly = true,
+                MaxAge = TimeSpan.FromDays(1),
+                Secure = true
+            });
             return Ok();
         }
         catch (RegistrationFailedException ex)

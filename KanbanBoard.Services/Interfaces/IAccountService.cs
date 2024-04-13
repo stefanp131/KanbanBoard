@@ -5,6 +5,6 @@ namespace KanbanBoard.Services.Interfaces;
 
 public interface IAccountService
 {
-    Task LoginAsync(LoginDto loginDto);
-    Task RegisterAsync(RegisterDto registerDto);
+    Task<string> LoginAsync(LoginDto loginDto);
+    Task<string> RegisterAsync(RegisterDto registerDto);
 }

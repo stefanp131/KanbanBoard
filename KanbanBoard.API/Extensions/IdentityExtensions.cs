@@ -3,9 +3,11 @@ using System.Text;
 using KanbanBoard.Data.Data;
 using KanbanBoard.Data.Entities;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace KanbanBoard.API.Extensions;
 
@@ -21,16 +23,22 @@ public static class IdentityExtensions
             .AddRoleValidator<RoleValidator<AppRole>>()
             .AddEntityFrameworkStores<KanbanBoardContext>();
 
-        services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie("Identity.Application",options =>
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
-                options.SlidingExpiration = true;
-                options.AccessDeniedPath = "/Forbidden/";
-                
-            });
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"])),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+            };
+        });
 
-        services.AddAuthorization(opt => { opt.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin")); });
+        services.AddAuthorization();
 
         return services;
     }
